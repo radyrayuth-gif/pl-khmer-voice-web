@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PL Khmer Voice</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@400;500;600;700&family=Segoe+UI:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css?v=3.7">
+</head>
+<body>
+    <div class="app-container">
+        <!-- 1. Window Title Bar (Matching PyQt5 Window Header) -->
+        <header class="window-title-bar">
+            <div class="window-title-left">
+                <span class="window-icon">🎙️</span>
+                <span class="window-title">PL Khmer Voice</span>
+                <span class="window-version-badge">v3.0 Desktop Edition</span>
+            </div>
+
+            <div class="window-title-right">
+                <div class="status-pill" id="serverStatusPill">
+                    <span class="status-dot green"></span>
+                    <span class="status-text" id="statusPillText">Server Online</span>
+                </div>
+                <div class="status-pill model-pill">
+                    <span class="model-badge">AI</span>
+                    <span id="activeModelLabel">gemini-3.5-flash-lite</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- 2. File Selection Bar (Exact file_frame from main.py lines 2133-2194) -->
+        <section class="file-toolbar-card">
+            <input type="text" class="file-path-input" id="filePathDisplay" placeholder="សូមជ្រើសរើស ឬទាញទម្លាក់ឯកសារ SRT នៅទីនេះ..." readonly>
+            <select class="file-path-input multi-file-dropdown" id="multiFileDropdown" style="display: none;" title="បញ្ជីឯកសារ SRT (ចុចដើម្បីប្តូរ ឬបញ្ចូលគ្នា)"></select>
+
+            <!-- 📂 រើស SRT -->
+            <label class="desktop-btn btn-browse-srt" for="srtFileInput" title="បើកឯកសារ SRT (អាចរើសម្តងបានច្រើនឯកសារ)">
+                <span class="btn-icon">📂</span>
+                <span class="btn-text">រើស SRT</span>
+                <input type="file" id="srtFileInput" accept=".srt" multiple style="display: none;">
+            </label>
+
+            <!-- ⚡ Auto Start -->
+            <button class="desktop-btn btn-master-action" id="btnMasterAction" title="ចុចតែមួយដំណើរការទាំងវិភាគភេទ បកប្រែ និងបង្កើតសំឡេងទាំងអស់">
+                <span class="btn-icon">⚡</span>
+                <span class="btn-text" id="btnMasterActionText">Auto Start</span>
+            </button>
+
+            <!-- 💾 នាំចេញ -->
+            <button class="desktop-btn btn-export-master" id="btnExportMaster" title="នាំចេញ 2-in-1: រក្សាទុក SRT + Compile Master Audio MP3">
+                <span class="btn-icon">💾</span>
+                <span class="btn-text">នាំចេញ</span>
+            </button>
+
+            <!-- ⚙️ ការកំណត់ -->
+            <button class="desktop-btn btn-open-settings" id="btnOpenSettings" title="ការកំណត់ API & ប្រព័ន្ធ">
+                <span class="btn-icon">⚙️</span>
+                <span class="btn-text">ការកំណត់</span>
+            </button>
+        </section>
+
+        <!-- Quick AI Configuration & Actions (Gemini Model & Translation Style directly outside Settings) -->
+        <section class="quick-config-card">
+            <div class="config-field">
+                <label for="mainModelSelect" class="config-label">🤖 ម៉ូដែល Gemini:</label>
+                <select class="config-select" id="mainModelSelect" title="ជ្រើសរើសម៉ូដែល Gemini">
+                    <option value="gemini-3.5-flash-lite" selected>⚡ Gemini 3.5 Flash-Lite (លឿន & សន្សំ ⭐)</option>
+                    <option value="gemini-flash-lite-latest">⚡ Gemini Flash-Lite Latest</option>
+                    <option value="gemini-3.8-flash">⚡ Gemini 3.8 Flash</option>
+                    <option value="gemini-3.7-flash">🚀 Gemini 3.7 Flash</option>
+                    <option value="gemini-3.6-flash">⚡ Gemini 3.6 Flash</option>
+                    <option value="gemini-3.5-flash">🔥 Gemini 3.5 Flash</option>
+                </select>
+            </div>
+
+            <div class="config-field">
+                <label for="mainStyleSelect" class="config-label">🎭 រចនាប័ទ្មបកប្រែ:</label>
+                <select class="config-select" id="mainStyleSelect" title="ជ្រើសរើសរចនាប័ទ្មបកប្រែ">
+                    <option value="emotion_acting" selected>🎭 សម្ដែងតាមអារម្មណ៍តួអង្គ (Emotion Acting ⭐)</option>
+                    <option value="dramatic_conflict">🔥 ក្ដៅក្រហាយ / ជម្លោះខ្លាំង</option>
+                    <option value="sad_tearful">😢 កម្សត់ / ស្រក់ទឹកភ្នែក / ឈឺចាប់</option>
+                    <option value="general">🎬 ទូទៅ / ភាពយន្តសម័យ</option>
+                    <option value="sweet">🌸 ផ្អែមល្ហែម / មនោសញ្ចេតនា</option>
+                    <option value="historical">⚔️ បុរាណ / ក្បាច់គុនយុទ្ធសិល្ប៍</option>
+                    <option value="comedy">😂 កំប្លុកកំប្លែង / សប្បាយៗ</option>
+                    <option value="formal">📜 ផ្លូវការ / ត្រឹមត្រូវ</option>
+                </select>
+            </div>
+
+            <div class="quick-pipeline-buttons">
+                <button class="btn-sub-action btn-sub-gender" id="btnAnalyzeGenders" title="វិភាគតួអង្គ និងកំណត់ភេទ (ប្រុស/ស្រី)">
+                    <span>🎭</span> វិភាគតួអង្គ
+                </button>
+                <button class="btn-sub-action btn-sub-translate" id="btnStartTranslation" title="បកប្រែ Subtitle ដោយ Gemini AI (Turbo Mode)">
+                    <span>✍️</span> បកប្រែ
+                </button>
+                <button class="btn-sub-action btn-sub-voices" id="btnGenAllVoices" title="បង្កើតសំឡេងទាំងអស់">
+                    <span>🎙️</span> បង្កើតសំឡេង
+                </button>
+            </div>
+        </section>
+
+        <!-- 3. Teleprompter Frame / Live Status Banner (Identical to main.py teleprompterFrame lines 1268-1281) -->
+        <section class="teleprompter-card" id="teleprompterFrame">
+            <div class="teleprompter-status-group">
+                <span class="spinner" id="teleprompterSpinner" style="display: none;"></span>
+                <span class="teleprompter-label" id="teleprompterStatusText">ត្រៀមរួចរាល់... សូមចុច "⚡ Auto Start" ដើម្បីដំណើរការដោយស្វ័យប្រវត្តិ។</span>
+            </div>
+            <span class="teleprompter-pct" id="teleprompterPct">0%</span>
+        </section>
+
+        <!-- Quick Filter & Search Bar -->
+        <div class="filter-search-row">
+            <div style="font-size: 11px; color: var(--text-muted); font-weight: 500;">
+                <span>តារាង Subtitle មេ (Master Subtitle Table)</span>
+            </div>
+            <div class="quick-search-box">
+                <span>🔍</span>
+                <input type="text" id="tableFilterInput" placeholder="ស្វែងរកតាមលេខ ឬអត្ថបទ...">
+            </div>
+        </div>
+
+        <!-- 4. Master Subtitle Table (Exact 9 Columns & Widths from main.py lines 2197-2248) -->
+        <section class="table-card">
+            <div class="table-responsive">
+                <table class="subtitle-table" id="masterSubtitleTable">
+                    <thead>
+                        <tr>
+                            <th class="col-idx">#</th>
+                            <th class="col-time">ពេលវេលា</th>
+                            <th class="col-voice">សំឡេង</th>
+                            <th class="col-echo">Echo</th>
+                            <th class="col-zh">ភាសាចិនដើម</th>
+                            <th class="col-km">ភាសាខ្មែរបកប្រែ</th>
+                            <th class="col-speed">ល្បឿន</th>
+                            <th class="col-duration">ប្រវែងសំឡេង</th>
+                            <th class="col-status">ស្ថានភាព</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                        <tr class="empty-row">
+                            <td colspan="9">
+                                <div class="empty-state">
+                                    <div class="empty-icon">📂</div>
+                                    <h3>មិនទាន់មានឯកសារ Subtitle ឡើយ</h3>
+                                    <p>សូមចុចប៊ូតុង <strong>📂 រើស SRT</strong> ដើម្បីជ្រើសរើសឯកសារ SRT របស់អ្នក។</p>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- 5. Progress and Counters Bar (Exact progress_container from main.py lines 2267-2292) -->
+        <section class="progress-container">
+            <!-- Row 1: Left status_label, Right file_info_label -->
+            <div class="status-file-info-row">
+                <span class="status-label" id="progressStatusLabel">ត្រៀមរួចរាល់</span>
+                <span class="file-info-label" id="fileInfoLabel">📄 មិនទាន់ផ្ទុកឯកសារ</span>
+            </div>
+
+            <!-- Row 2: stats_counter_label -->
+            <div class="stats-counter-label" id="statsCounterLabel">
+                សរុប: <strong id="statTotalCount">0</strong> | បកប្រែរួច: <strong id="statTransCount">0</strong> | សំឡេងរួច: <strong id="statAudioCount">0</strong> | នៅសល់: <strong id="statRemainingCount">0</strong>
+            </div>
+
+            <!-- Row 3: Slim Minimalist QProgressBar (height: 14px, lines 1186-1209) -->
+            <div class="progress-bar-wrapper" id="progressBarWrapper">
+                <div class="progress-bar-chunk" id="teleprompterProgressBar" style="width: 0%;"></div>
+                <span class="progress-bar-text" id="progressBarText">0%</span>
+            </div>
+        </section>
+    </div>
+
+    <!-- 6. Sticky Master Audio Player Bar (Matching desktop media player controls) -->
+    <footer class="master-player-bar" id="masterPlayerBar">
+        <div class="player-inner">
+            <div class="player-left">
+                <button class="player-btn-main" id="btnMasterPlayPause" title="Play/Pause Master Audio">
+                    <span id="playerIconPlay">▶</span>
+                    <span id="playerIconPause" style="display: none;">⏸</span>
+                </button>
+                <div class="master-track-info">
+                    <div class="master-track-title" id="masterTrackTitle">Master Voiceover Audio</div>
+                    <div class="master-track-time">
+                        <span id="playerCurrentTime">00:00</span> / <span id="playerTotalDuration">00:00</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="player-center">
+                <input type="range" class="timeline-slider" id="masterTimelineSlider" min="0" max="100" value="0" step="0.1">
+            </div>
+
+            <div class="player-right">
+                <label class="auto-sync-check" title="រំកិលតារាងស្វ័យប្រវត្តិតាមសំឡេងដែលកំពុងចាក់">
+                    <input type="checkbox" id="autoScrollToggle" checked>
+                    <span>Auto-Sync</span>
+                </label>
+
+                <div class="volume-wrap">
+                    <span>🔊</span>
+                    <input type="range" class="volume-slider" id="masterVolumeSlider" min="0" max="1" step="0.05" value="1">
+                </div>
+
+                <a class="btn-download-mp3" id="btnDownloadMaster" href="#" download="master_voiceover.mp3" style="display: none;">
+                    <span>⬇️ MP3</span>
+                </a>
+            </div>
+        </div>
+        <audio id="masterAudioElement" preload="auto"></audio>
+        <audio id="rowAudioElement" preload="auto"></audio>
+    </footer>
+
+    <!-- 7. Settings Modal (Matching QTabWidget & QGroupBox from main.py) -->
+    <div class="modal-overlay" id="settingsModal" style="display: none;">
+        <div class="modal-card">
+            <div class="modal-header">
+                <div class="modal-title-group">
+                    <span>⚙️</span>
+                    <span>ការកំណត់ប្រព័ន្ធ (System Settings)</span>
+                </div>
+                <button class="modal-close" id="btnCloseSettings">&times;</button>
+            </div>
+
+            <div class="modal-body">
+                <!-- Group 1: Gemini AI & API Keys -->
+                <div class="settings-groupbox">
+                    <div class="settings-groupbox-title">🤖 ១. ការកំណត់ Gemini AI & API Key</div>
+                    
+                    <div class="form-group" style="margin-top: 10px;">
+                        <div class="form-label">
+                            <span>Gemini API Keys:</span>
+                            <button class="btn-sub-action" style="height: 22px; padding: 0 6px; font-size: 10px;" id="btnToggleKeyVisibility">👁 បង្ហាញ/លាក់</button>
+                        </div>
+                        <textarea class="form-textarea" id="settingsApiKeys" rows="3" placeholder="AIzaSy... ឬ AQ... (មួយជួរ = មួយ Key)"></textarea>
+                        <div class="key-test-bar">
+                            <button class="btn-sub-action" id="btnTestKey">
+                                <span class="spinner-small" id="testKeySpinner" style="display: none;"></span>
+                                <span>🔍 តេស្ត API Key</span>
+                            </button>
+                            <span class="key-test-msg" id="keyTestResult" style="font-size: 11px;"></span>
+                        </div>
+                    </div>
+
+                    <div class="form-grid-2" style="margin-top: 8px;">
+                        <div class="form-group">
+                            <label class="form-label" for="settingsModel">ម៉ូដែល Gemini:</label>
+                            <select class="form-select" id="settingsModel">
+                                <option value="gemini-3.5-flash-lite" selected>⚡ Gemini 3.5 Flash-Lite (លឿន & សន្សំ ⭐)</option>
+                                <option value="gemini-flash-lite-latest">⚡ Gemini Flash-Lite Latest</option>
+                                <option value="gemini-3.8-flash">⚡ Gemini 3.8 Flash</option>
+                                <option value="gemini-3.7-flash">🚀 Gemini 3.7 Flash</option>
+                                <option value="gemini-3.6-flash">⚡ Gemini 3.6 Flash</option>
+                                <option value="gemini-3.5-flash">🔥 Gemini 3.5 Flash</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="settingsStyle">រចនាប័ទ្មបកប្រែ:</label>
+                            <select class="form-select" id="settingsStyle">
+                                <option value="emotion_acting" selected>🎭 សម្ដែងតាមអារម្មណ៍តួអង្គ (Emotion Acting ⭐)</option>
+                                <option value="dramatic_conflict">🔥 ក្ដៅក្រហាយ / ជម្លោះខ្លាំង</option>
+                                <option value="sad_tearful">😢 កម្សត់ / ស្រក់ទឹកភ្នែក / ឈឺចាប់</option>
+                                <option value="general">🎬 ទូទៅ / ភាពយន្តសម័យ</option>
+                                <option value="sweet">🌸 ផ្អែមល្ហែម / មនោសញ្ចេតនា</option>
+                                <option value="historical">⚔️ បុរាណ / ក្បាច់គុនយុទ្ធសិល្ប៍</option>
+                                <option value="comedy">😂 កំប្លុកកំប្លែង / សប្បាយៗ</option>
+                                <option value="formal">📜 ផ្លូវការ / ត្រឹមត្រូវ</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Group 2: Edge-TTS & Audio Configuration -->
+                <div class="settings-groupbox" style="margin-top: 14px;">
+                    <div class="settings-groupbox-title">🎙️ ២. ការកំណត់សំឡេង Edge-TTS</div>
+
+                    <div class="form-grid-2" style="margin-top: 10px;">
+                        <div class="form-group">
+                            <div class="form-label">
+                                <span>ល្បឿនសំឡេង (Rate):</span>
+                                <span id="labelRateVal" style="color: var(--title-color);">+20%</span>
+                            </div>
+                            <input type="range" class="form-range" id="settingsRateSlider" min="-25" max="50" value="20" step="5">
+                        </div>
+
+                        <div class="form-group">
+                            <div class="form-label">
+                                <span>កម្រិតសម្លេង (Pitch):</span>
+                                <span id="labelPitchVal" style="color: var(--title-color);">+0Hz</span>
+                            </div>
+                            <input type="range" class="form-range" id="settingsPitchSlider" min="-20" max="20" value="0" step="2">
+                        </div>
+                    </div>
+
+                    <div class="form-grid-2" style="margin-top: 8px;">
+                        <div class="form-group">
+                            <div class="form-label">
+                                <span>Batch Size:</span>
+                                <span id="labelBatchSize" style="color: var(--title-color);">30</span>
+                            </div>
+                            <input type="range" class="form-range" id="settingsBatchSlider" min="10" max="80" value="30" step="5">
+                        </div>
+
+                        <div class="form-group">
+                            <div class="form-label">
+                                <span>Concurrency (Threads):</span>
+                                <span id="labelConcurrency" style="color: var(--title-color);">8</span>
+                            </div>
+                            <input type="range" class="form-range" id="settingsConcurrencySlider" min="2" max="16" value="8" step="1">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="desktop-btn" id="btnCancelSettings" style="height: 34px; min-width: 80px;">❌ បោះបង់</button>
+                <button class="desktop-btn btn-master-action" id="btnSaveSettings" style="height: 34px; min-width: 95px;">💾 រក្សាទុក</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Toasts -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script src="app.js?v=3.7"></script>
+</body>
+</html>

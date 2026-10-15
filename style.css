@@ -1,0 +1,1180 @@
+/* ==========================================================================
+   PL Khmer Voice - Exact 100% PyQt5 Desktop Theme (matching SRT/main.py)
+   Colors, Fonts (12px), Margins (10px 8px), and Exact Dimensions
+   ========================================================================== */
+
+:root {
+    /* Exact Palette from SRT/main.py (lines 977-1024) */
+    --bg-main: #121214;
+    --bg-card: #1A1A1E;
+    --border-card: #2A2A32;
+    --border-input: #383842;
+    --bg-input: #222227;
+    --text-primary: #F4F4F6;
+    --text-muted: #9B9BA6;
+    --title-color: #00E5FF;
+    --table-bg: #161619;
+    --table-grid: #24242A;
+    --btn-bg: #24242A;
+    --btn-text: #FFFFFF;
+    --btn-border: #363640;
+    --btn-hover: #32323A;
+    --table-hdr-bg: #24242A;
+    --table-hdr-text: #FFFFFF;
+    --table-sel-bg: #1C3342;
+    --progress-bg: #1F1F24;
+    --teleprompter-bg: #18181D;
+    --teleprompter-border: #00B4D8;
+    --teleprompter-text: #00F2FE;
+    --accent-color: #00B4D8;
+    --accent-hover: #00F2FE;
+    --accent-deep: #0096C7;
+
+    /* Desktop font variables */
+    --font-main: 'Kantumruy Pro', 'Kantumruy', 'Khmer OS Battambang', 'Segoe UI', Tahoma, sans-serif;
+    --base-font-size: 12px;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    outline: none;
+    font-family: var(--font-main);
+    font-size: var(--base-font-size);
+}
+
+body {
+    background-color: var(--bg-main);
+    color: var(--text-primary);
+    min-height: 100vh;
+    overflow-x: hidden;
+    line-height: 1.4;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* Main Container (Balanced Desktop Width: max-width 1260px) */
+.app-container {
+    padding: 10px 14px 65px 14px;
+    max-width: 1260px;
+    width: 100%;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+/* 1. Window Header / Title Bar (Native App Style) */
+.window-title-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-card);
+    border-radius: 6px;
+    padding: 6px 10px;
+    height: 38px;
+}
+
+.window-title-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.window-icon {
+    font-size: 14px;
+}
+
+.window-title {
+    font-size: 13px;
+    font-weight: bold;
+    color: var(--title-color);
+    letter-spacing: 0.3px;
+}
+
+.window-version-badge {
+    font-size: 11px;
+    background-color: var(--btn-bg);
+    border: 1px solid var(--btn-border);
+    border-radius: 4px;
+    padding: 2px 6px;
+    color: var(--accent-hover);
+    font-weight: 600;
+}
+
+.window-title-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background-color: var(--bg-input);
+    border: 1px solid var(--border-input);
+    border-radius: 4px;
+    padding: 3px 8px;
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+.status-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background-color: #64748B;
+}
+
+.status-dot.green {
+    background-color: #10B981;
+    box-shadow: 0 0 6px rgba(16, 185, 129, 0.6);
+}
+
+.status-text {
+    font-size: 11px;
+    color: var(--text-primary);
+}
+
+.model-pill {
+    color: var(--accent-hover);
+    border-color: var(--btn-border);
+}
+
+.model-badge {
+    background-color: var(--accent-deep);
+    color: #FFFFFF;
+    font-size: 9px;
+    font-weight: bold;
+    padding: 1px 4px;
+    border-radius: 3px;
+}
+
+/* 2. Top Controls Toolbar (Identical to PyQt5 file_frame lines 2133-2194) */
+.file-toolbar-card {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background-color: transparent;
+}
+
+.file-path-input {
+    flex: 2;
+    height: 40px;
+    background-color: var(--bg-card);
+    border: 1.5px solid var(--accent-color);
+    border-radius: 6px;
+    padding: 4px 10px;
+    color: var(--text-primary);
+    font-size: 12px;
+    font-weight: 500;
+    transition: border-color 0.15s ease;
+}
+
+.file-path-input:focus {
+    border: 2px solid var(--accent-hover);
+}
+
+.file-path-input::placeholder {
+    color: var(--text-muted);
+}
+
+select.file-path-input.multi-file-dropdown {
+    cursor: pointer;
+    font-weight: bold;
+    color: var(--accent-hover);
+}
+
+select.file-path-input.multi-file-dropdown option {
+    background-color: var(--bg-card);
+    color: var(--text-primary);
+    padding: 6px 8px;
+    font-size: 12px;
+}
+
+/* Buttons (Matching desktop QPushButton: height 40px, min-width 82px, 2-line layout) */
+.desktop-btn {
+    height: 40px;
+    min-width: 82px;
+    background-color: var(--btn-bg);
+    color: var(--btn-text);
+    border: 1px solid var(--btn-border);
+    border-radius: 6px;
+    padding: 2px 8px;
+    font-size: 12px;
+    font-weight: bold;
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    text-align: center;
+    line-height: 1.15;
+    user-select: none;
+    transition: background-color 0.12s ease, border-color 0.12s ease, color 0.12s ease;
+    white-space: nowrap;
+}
+
+.desktop-btn:hover {
+    background-color: var(--btn-hover);
+    border-color: var(--accent-hover);
+    color: var(--title-color);
+}
+
+.desktop-btn:active {
+    background-color: var(--accent-deep);
+    color: #FFFFFF;
+}
+
+.desktop-btn:disabled {
+    background-color: var(--border-card);
+    color: #64748B;
+    border-color: var(--border-card);
+    cursor: not-allowed;
+    opacity: 0.65;
+}
+
+.desktop-btn .btn-icon {
+    font-size: 13px;
+    margin-bottom: 1px;
+}
+
+.desktop-btn .btn-text {
+    font-size: 11px;
+    font-weight: bold;
+}
+
+/* Distinct Button Color Schemes (Matching Application Roles) */
+
+/* 1. 📂 Browse SRT (Sky Blue Accent) */
+.desktop-btn.btn-browse-srt {
+    background: linear-gradient(180deg, #1E293B 0%, #0F172A 100%);
+    border: 1px solid #38BDF8;
+    color: #E0F2FE;
+}
+.desktop-btn.btn-browse-srt:hover {
+    background: #0284C7;
+    border-color: #7DD3FC;
+    color: #FFFFFF;
+    box-shadow: 0 0 10px rgba(56, 189, 248, 0.4);
+}
+
+/* 2. ⚡ Auto Start (Flagship Cyan to Indigo Glow) */
+.desktop-btn.btn-master-action {
+    background: linear-gradient(135deg, #0284C7 0%, #4F46E5 100%);
+    border: 1.5px solid #38BDF8;
+    color: #FFFFFF;
+    box-shadow: 0 2px 10px rgba(14, 165, 233, 0.45);
+}
+.desktop-btn.btn-master-action:hover {
+    background: linear-gradient(135deg, #0EA5E9 0%, #6366F1 100%);
+    border-color: #7DD3FC;
+    color: #FFFFFF;
+    box-shadow: 0 0 14px rgba(14, 165, 233, 0.7);
+}
+.desktop-btn.btn-master-action.running {
+    background: linear-gradient(135deg, #DC2626 0%, #991B1B 100%) !important;
+    border-color: #EF4444 !important;
+    box-shadow: 0 0 14px rgba(239, 68, 68, 0.7) !important;
+}
+
+/* 3. 💾 នាំចេញ (Emerald Green) */
+.desktop-btn.btn-export-master {
+    background: linear-gradient(180deg, #065F46 0%, #044E39 100%);
+    border: 1.5px solid #10B981;
+    color: #D1FAE5;
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+}
+.desktop-btn.btn-export-master:hover {
+    background: #059669;
+    border-color: #34D399;
+    color: #FFFFFF;
+    box-shadow: 0 0 12px rgba(16, 185, 129, 0.55);
+}
+
+/* 4. ⚙️ ការកំណត់ (Indigo / Purple Accent) */
+.desktop-btn.btn-open-settings {
+    background: linear-gradient(180deg, #312E81 0%, #1E1B4B 100%);
+    border: 1px solid #818CF8;
+    color: #E0E7FF;
+}
+.desktop-btn.btn-open-settings:hover {
+    background: #4F46E5;
+    border-color: #A5B4FC;
+    color: #FFFFFF;
+    box-shadow: 0 0 10px rgba(129, 140, 248, 0.45);
+}
+
+/* 5. 📄 Sample (Teal / Cyan) */
+.desktop-btn.btn-load-sample {
+    background: linear-gradient(180deg, #164E63 0%, #083344 100%);
+    border: 1px solid #06B6D4;
+    color: #CFFAFE;
+}
+.desktop-btn.btn-load-sample:hover {
+    background: #0891B2;
+    border-color: #67E8F9;
+    color: #FFFFFF;
+    box-shadow: 0 0 10px rgba(6, 182, 212, 0.45);
+}
+
+/* Secondary toolbar actions (collapsible/compact) */
+.sub-actions-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* Quick Config Card (External Model & Style Dropdowns on Main UI) */
+.quick-config-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-card);
+    border-radius: 6px;
+    padding: 6px 10px;
+    flex-wrap: wrap;
+}
+
+.config-field {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex: 1;
+    min-width: 260px;
+}
+
+.config-label {
+    font-size: 11px;
+    font-weight: bold;
+    color: var(--title-color);
+    white-space: nowrap;
+}
+
+.config-select {
+    flex: 1;
+    height: 32px;
+    background-color: var(--bg-input);
+    border: 1px solid var(--border-input);
+    border-radius: 5px;
+    padding: 2px 8px;
+    color: var(--text-primary);
+    font-size: 11px;
+    cursor: pointer;
+}
+
+.config-select:focus {
+    border-color: var(--accent-hover);
+}
+
+.quick-pipeline-buttons {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.btn-sub-action {
+    height: 32px;
+    min-width: 80px;
+    padding: 0 10px;
+    background-color: var(--btn-bg);
+    color: var(--text-primary);
+    border: 1px solid var(--btn-border);
+    border-radius: 5px;
+    font-size: 11px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    cursor: pointer;
+    transition: background-color 0.12s ease, border-color 0.12s ease, box-shadow 0.12s ease;
+}
+
+/* 🎭 វិភាគតួអង្គ (Deep Purple) */
+.btn-sub-action.btn-sub-gender {
+    background-color: #2E1065;
+    border-color: #8B5CF6;
+    color: #E9D5FF;
+}
+.btn-sub-action.btn-sub-gender:hover {
+    background-color: #581C87;
+    border-color: #C084FC;
+    color: #FFFFFF;
+    box-shadow: 0 0 8px rgba(139, 92, 246, 0.45);
+}
+
+/* ✍️ បកប្រែ (Warm Amber) */
+.btn-sub-action.btn-sub-translate {
+    background-color: #451A03;
+    border-color: #F59E0B;
+    color: #FEF3C7;
+}
+.btn-sub-action.btn-sub-translate:hover {
+    background-color: #78350F;
+    border-color: #FBBF24;
+    color: #FFFFFF;
+    box-shadow: 0 0 8px rgba(245, 158, 11, 0.45);
+}
+
+/* 🎙️ បង្កើតសំឡេង (Vibrant Cyan) */
+.btn-sub-action.btn-sub-voices {
+    background-color: #083344;
+    border-color: #00B4D8;
+    color: #E0F2FE;
+}
+.btn-sub-action.btn-sub-voices:hover {
+    background-color: #0E7490;
+    border-color: #38BDF8;
+    color: #FFFFFF;
+    box-shadow: 0 0 8px rgba(0, 180, 216, 0.45);
+}
+
+/* 3. Teleprompter Frame (Matching desktop #teleprompterFrame lines 1268-1281) */
+.teleprompter-card {
+    background-color: var(--teleprompter-bg);
+    border: 1px solid var(--teleprompter-border);
+    border-radius: 6px;
+    padding: 4px 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 32px;
+}
+
+.teleprompter-status-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    overflow: hidden;
+}
+
+.teleprompter-label {
+    color: var(--teleprompter-text);
+    font-weight: bold;
+    font-size: 12px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+.teleprompter-pct {
+    color: var(--teleprompter-text);
+    font-weight: bold;
+    font-size: 12px;
+    margin-left: 8px;
+}
+
+/* Filter & Search Bar */
+.filter-search-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.quick-search-box {
+    display: flex;
+    align-items: center;
+    background-color: var(--bg-input);
+    border: 1px solid var(--border-input);
+    border-radius: 5px;
+    padding: 3px 8px;
+    height: 32px;
+    width: 280px;
+}
+
+.quick-search-box input {
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+    font-size: 11px;
+    width: 100%;
+    margin-left: 4px;
+}
+
+/* 4. Master Subtitle Table (Exact PyQt5 QTableWidget lines 2197-2248) */
+.table-card {
+    background-color: var(--table-bg);
+    border: 1px solid var(--border-card);
+    border-radius: 6px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.table-responsive {
+    overflow-x: hidden; /* Fits 100% without horizontal scrollbar */
+    overflow-y: auto;
+    max-height: calc(100vh - 290px);
+    min-height: 340px;
+}
+
+.subtitle-table {
+    width: 100%;
+    min-width: 100%;
+    border-collapse: collapse;
+    background-color: var(--table-bg);
+    color: var(--text-primary);
+    font-size: 12px;
+    table-layout: fixed;
+}
+
+.subtitle-table th {
+    background-color: var(--table-hdr-bg);
+    color: var(--table-hdr-text);
+    padding: 6px 2px;
+    font-weight: bold;
+    font-size: 11px;
+    border: 1px solid var(--btn-border);
+    border-top: none;
+    border-left: none;
+    text-align: center;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    user-select: none;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Precise 100% Proportional Column Widths (Zero horizontal scrollbar) */
+.col-idx       { width: 4.5%; }
+.col-time      { width: 11%; }
+.col-voice     { width: 12%; }
+.col-echo      { width: 5.5%; }
+.col-zh        { width: 24%; }
+.col-km        { width: 27%; }
+.col-speed     { width: 5%; }
+.col-duration  { width: 5.5%; }
+.col-status    { width: 5.5%; }
+
+.subtitle-table td {
+    padding: 3px 4px;
+    border: 1px solid var(--table-grid);
+    font-size: 12px;
+    vertical-align: middle;
+}
+
+.subtitle-table tbody tr:hover {
+    background-color: rgba(28, 51, 66, 0.4);
+}
+
+.subtitle-table tbody tr.active-playback-row,
+.subtitle-table tbody tr.selected {
+    background-color: var(--table-sel-bg) !important;
+}
+
+.sub-idx {
+    text-align: center;
+    color: var(--text-muted);
+    font-weight: bold;
+}
+
+.timing-box {
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 11px;
+    color: var(--text-muted);
+    white-space: nowrap;
+    text-align: center;
+    display: block;
+}
+
+/* Voice dropdown in table */
+.table-select {
+    width: 100%;
+    background-color: var(--bg-input);
+    color: var(--text-primary);
+    border: 1px solid var(--border-input);
+    border-radius: 4px;
+    padding: 3px 4px;
+    font-size: 11px;
+}
+
+.table-select:focus {
+    border-color: var(--accent-hover);
+}
+
+/* Echo Checkbox */
+.echo-checkbox {
+    width: 15px;
+    height: 15px;
+    border-radius: 3px;
+    border: 1.5px solid var(--border-input);
+    accent-color: var(--accent-color);
+    cursor: pointer;
+}
+
+/* Chinese Text Cell */
+.orig-text-cell {
+    font-size: 12px;
+    color: #CBD5E1;
+    word-break: break-word;
+    line-height: 1.35;
+    max-height: 52px;
+    overflow-y: auto;
+}
+
+/* Khmer Textarea Cell */
+.khmer-input-cell {
+    width: 100%;
+    background-color: var(--bg-input);
+    color: var(--text-primary);
+    border: 1px solid var(--border-input);
+    border-radius: 4px;
+    padding: 4px 6px;
+    font-size: 12px;
+    line-height: 1.4;
+    resize: vertical;
+    min-height: 36px;
+}
+
+.khmer-input-cell:focus {
+    border: 1.5px solid var(--accent-hover);
+    background-color: #26262D;
+}
+
+/* Speed Badge */
+.speed-badge {
+    display: inline-block;
+    padding: 2px 2px;
+    background-color: var(--bg-input);
+    border: 1px solid var(--border-input);
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: bold;
+    color: var(--title-color);
+    text-align: center;
+    width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Duration Cell */
+.duration-cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    font-size: 10px;
+    color: var(--text-muted);
+    white-space: nowrap;
+}
+
+.btn-row-play {
+    width: 18px;
+    height: 18px;
+    border-radius: 3px;
+    background-color: var(--btn-bg);
+    border: 1px solid var(--btn-border);
+    color: var(--btn-text);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 9px;
+    transition: all 0.12s ease;
+    flex-shrink: 0;
+}
+
+.btn-row-play:hover {
+    background-color: var(--btn-hover);
+    border-color: var(--accent-hover);
+    color: var(--title-color);
+}
+
+.btn-row-play.has-audio {
+    background-color: #065F46;
+    border-color: #10B981;
+    color: #FFFFFF;
+}
+
+/* Status Badges */
+.status-badge {
+    display: inline-block;
+    padding: 2px 3px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: bold;
+    text-align: center;
+    width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.status-badge.ready {
+    background-color: rgba(16, 185, 129, 0.2);
+    border: 1px solid #10B981;
+    color: #10B981;
+}
+
+.status-badge.translating {
+    background-color: rgba(245, 158, 11, 0.2);
+    border: 1px solid #F59E0B;
+    color: #F59E0B;
+}
+
+.status-badge.translated {
+    background-color: rgba(56, 189, 248, 0.2);
+    border: 1px solid #38BDF8;
+    color: #38BDF8;
+}
+
+.status-badge.failed {
+    background-color: rgba(239, 68, 68, 0.2);
+    border: 1px solid #EF4444;
+    color: #EF4444;
+}
+
+.status-badge.waiting {
+    background-color: var(--bg-input);
+    border: 1px solid var(--border-input);
+    color: var(--text-muted);
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-muted);
+}
+
+.empty-icon {
+    font-size: 32px;
+    margin-bottom: 8px;
+}
+
+.empty-state h3 {
+    font-size: 13px;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+}
+
+.empty-state p {
+    font-size: 11px;
+}
+
+/* 5. Progress and Counters Bar (Exact progress_container lines 2267-2292) */
+.progress-container {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 4px 2px;
+}
+
+/* Row 1: Left status_label, Right file_info_label */
+.status-file-info-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.status-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.file-info-label {
+    font-size: 12px;
+    font-weight: bold;
+    color: var(--accent-color);
+}
+
+/* Row 2: stats_counter_label */
+.stats-counter-label {
+    font-size: 12px;
+    font-weight: bold;
+    color: var(--text-primary);
+}
+
+/* Row 3: Slim Minimalist QProgressBar with percentage (lines 1186-1209) */
+.progress-bar-wrapper {
+    width: 100%;
+    height: 14px;
+    background-color: var(--progress-bg);
+    border: 1px solid var(--border-card);
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+}
+
+.progress-bar-chunk {
+    height: 100%;
+    background: linear-gradient(to right, #4F46E5, #06B6D4, #10B981);
+    border-radius: 3px;
+    width: 0%;
+    transition: width 0.25s ease;
+}
+
+.progress-bar-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 10px;
+    font-weight: bold;
+    color: #FFFFFF;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+    pointer-events: none;
+}
+
+/* 6. Master Audio Player Bar (Matching desktop media controls lines 2300-2307) */
+.master-player-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 48px;
+    background-color: var(--bg-card);
+    border-top: 1px solid var(--border-card);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+}
+
+.player-inner {
+    width: 100%;
+    max-width: 1260px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 14px;
+}
+
+.player-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 220px;
+}
+
+.player-btn-main {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background-color: var(--accent-color);
+    border: 1px solid var(--accent-hover);
+    color: #FFFFFF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.player-btn-main:hover {
+    background-color: var(--accent-hover);
+}
+
+.master-track-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.master-track-title {
+    font-size: 11px;
+    font-weight: bold;
+    color: var(--title-color);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 180px;
+}
+
+.master-track-time {
+    font-size: 10px;
+    color: var(--text-muted);
+    font-family: 'Consolas', monospace;
+}
+
+.player-center {
+    flex: 1;
+    max-width: 600px;
+    margin: 0 16px;
+}
+
+.timeline-slider {
+    width: 100%;
+    height: 6px;
+    background: var(--border-card);
+    border-radius: 3px;
+    accent-color: var(--accent-color);
+    cursor: pointer;
+}
+
+.player-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.auto-sync-check {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    color: var(--text-primary);
+    cursor: pointer;
+}
+
+.volume-wrap {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+}
+
+.volume-slider {
+    width: 75px;
+    height: 6px;
+    background: var(--border-card);
+    border-radius: 3px;
+    accent-color: var(--accent-color);
+    cursor: pointer;
+}
+
+.btn-download-mp3 {
+    height: 28px;
+    padding: 0 10px;
+    background-color: #059669;
+    border: 1px solid #10B981;
+    border-radius: 4px;
+    color: #FFFFFF;
+    font-size: 11px;
+    font-weight: bold;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.btn-download-mp3:hover {
+    background-color: #10B981;
+}
+
+/* 7. Settings Modal (Exact PyQt5 QTabWidget & QGroupBox lines 1059-1085, 1282-1329) */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal-card {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-card);
+    border-radius: 8px;
+    width: 620px;
+    max-width: 95vw;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.7);
+}
+
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border-card);
+    background-color: var(--btn-bg);
+    border-top-left-radius: 7px;
+    border-top-right-radius: 7px;
+}
+
+.modal-title-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: bold;
+    color: var(--title-color);
+}
+
+.modal-close {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: 18px;
+    cursor: pointer;
+}
+
+.modal-close:hover {
+    color: #EF4444;
+}
+
+.modal-body {
+    padding: 14px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* QGroupBox styling */
+.settings-groupbox {
+    border: 1px solid var(--border-card);
+    border-radius: 6px;
+    background-color: var(--bg-card);
+    padding: 12px;
+    margin-top: 6px;
+    position: relative;
+}
+
+.settings-groupbox-title {
+    position: absolute;
+    top: -10px;
+    left: 12px;
+    padding: 2px 8px;
+    background-color: var(--btn-bg);
+    border: 1px solid var(--btn-border);
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: bold;
+    color: var(--btn-text);
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 6px;
+}
+
+.form-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    font-weight: bold;
+    color: var(--text-primary);
+}
+
+.form-textarea {
+    background-color: var(--bg-input);
+    border: 1px solid var(--border-input);
+    border-radius: 5px;
+    padding: 6px 8px;
+    color: var(--text-primary);
+    font-size: 12px;
+    font-family: 'Consolas', monospace;
+    resize: vertical;
+}
+
+.form-textarea:focus,
+.form-select:focus,
+.form-range:focus {
+    border-color: var(--accent-hover);
+}
+
+.form-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.form-select {
+    background-color: var(--bg-input);
+    border: 1px solid var(--border-input);
+    border-radius: 5px;
+    padding: 4px 8px;
+    color: var(--text-primary);
+    font-size: 11px;
+    height: 32px;
+}
+
+.form-range {
+    height: 6px;
+    accent-color: var(--accent-color);
+    cursor: pointer;
+    background: var(--border-card);
+    border-radius: 3px;
+}
+
+.key-test-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 4px;
+}
+
+.modal-footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    padding: 10px 14px;
+    border-top: 1px solid var(--border-card);
+    background-color: var(--bg-card);
+}
+
+/* Spinners */
+.spinner {
+    width: 14px;
+    height: 14px;
+    border: 2px solid var(--border-card);
+    border-top-color: var(--accent-color);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    display: inline-block;
+}
+
+.spinner-small {
+    width: 11px;
+    height: 11px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: #FFFFFF;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    display: inline-block;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Toast notifications */
+.toast-container {
+    position: fixed;
+    top: 14px;
+    right: 14px;
+    z-index: 2000;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.toast {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-card);
+    border-radius: 6px;
+    padding: 8px 14px;
+    font-size: 12px;
+    color: var(--text-primary);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    animation: toastIn 0.2s ease-out;
+}
+
+.toast.success { border-color: #10B981; }
+.toast.error   { border-color: #EF4444; }
+.toast.info    { border-color: #38BDF8; }
+
+@keyframes toastIn {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
