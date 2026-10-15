@@ -1,0 +1,14 @@
+__pycache__/
+*.pyc
+env/
+venv/
+.venv/
+build/
+dist/
+SRT/build/
+SRT/dist/
+SRT/crash.log
+SRT/.ruff_cache/
+audio_output/*.mp3
+audio_output/*.wav
+.system_generated/
