@@ -27,7 +27,27 @@ import edge_tts
 from pydub import AudioSegment
 import srt
 
-# Import exact battle-tested engines from SRT directory
+# Import audio processing helpers (pure Python + pydub, zero PyQt5 dependency)
+try:
+    from voice_helpers import (
+        apply_echo_effect,
+        clean_tts_text,
+        expand_khmer_lekh_tho,
+        get_file_duration_ms,
+        parse_voice_and_echo_from_text,
+        trim_leading_trailing_silence,
+    )
+except ImportError:
+    from voice_engine import (
+        apply_echo_effect,
+        clean_tts_text,
+        expand_khmer_lekh_tho,
+        get_file_duration_ms,
+        parse_voice_and_echo_from_text,
+        trim_leading_trailing_silence,
+    )
+
+# Import subtitle translation engine
 try:
     from translator_engine import (
         GeminiSubtitleTranslator,
@@ -42,14 +62,6 @@ try:
         sanitize_khmer_text,
         test_gemini_api_key,
     )
-    from voice_engine import (
-        apply_echo_effect,
-        clean_tts_text,
-        expand_khmer_lekh_tho,
-        get_file_duration_ms,
-        parse_voice_and_echo_from_text,
-        trim_leading_trailing_silence,
-    )
 except ImportError:
     from SRT.translator_engine import (
         GeminiSubtitleTranslator,
@@ -63,14 +75,6 @@ except ImportError:
         replace_numbers_with_khmer_words,
         sanitize_khmer_text,
         test_gemini_api_key,
-    )
-    from SRT.voice_engine import (
-        apply_echo_effect,
-        clean_tts_text,
-        expand_khmer_lekh_tho,
-        get_file_duration_ms,
-        parse_voice_and_echo_from_text,
-        trim_leading_trailing_silence,
     )
 
 app = FastAPI(title="PL Khmer Voice - SRT & TTS Studio", version="2.0.0")
