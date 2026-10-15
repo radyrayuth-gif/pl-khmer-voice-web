@@ -84,6 +84,8 @@ app.add_middleware(
 )
 
 STATIC_DIR = os.path.join(BASE_DIR, "static")
+if not os.path.exists(os.path.join(STATIC_DIR, "index.html")) and os.path.exists(os.path.join(BASE_DIR, "index.html")):
+    STATIC_DIR = BASE_DIR
 os.makedirs(STATIC_DIR, exist_ok=True)
 
 # Helper to read desktop settings from QSettings
