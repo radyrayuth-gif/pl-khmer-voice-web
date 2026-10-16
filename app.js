@@ -16,7 +16,7 @@ class AppState {
             requestDelay: 0.1,
             rate: "+20%",
             pitch: "+0Hz",
-            bitrate: "320k"
+            bitrate: "128k"
         };
         this.fileLibrary = []; // Array of { filename, items, masterAudioUrl }
         this.currentFileIndex = 0;
@@ -105,6 +105,7 @@ const dom = {
     labelBatchSize: document.getElementById("labelBatchSize"),
     settingsConcurrencySlider: document.getElementById("settingsConcurrencySlider"),
     labelConcurrency: document.getElementById("labelConcurrency"),
+    settingsBitrate: document.getElementById("settingsBitrate"),
 
     toastContainer: document.getElementById("toastContainer")
 };
@@ -139,9 +140,17 @@ function initWebSocket() {
     state.ws.onopen = () => {
         dom.serverStatusPill.querySelector(".status-dot").className = "status-dot green";
         dom.statusPillText.textContent = "Server Online";
+        // Cloud Keep-Alive: Ping server every 20s so Render proxy never drops connection
+        if (state.pingInterval) clearInterval(state.pingInterval);
+        state.pingInterval = setInterval(() => {
+            if (state.ws && state.ws.readyState === WebSocket.OPEN) {
+                state.ws.send(JSON.stringify({ type: "ping" }));
+            }
+        }, 20000);
     };
 
     state.ws.onclose = () => {
+        if (state.pingInterval) clearInterval(state.pingInterval);
         dom.serverStatusPill.querySelector(".status-dot").className = "status-dot red";
         dom.statusPillText.textContent = "Disconnected";
         setTimeout(initWebSocket, 3000);
@@ -150,6 +159,7 @@ function initWebSocket() {
     state.ws.onmessage = (event) => {
         try {
             const data = JSON.parse(event.data);
+            if (data.type === "pong") return; // Heartbeat reply
             handleWsMessage(data);
         } catch (e) {}
     };
@@ -1005,6 +1015,10 @@ function initSettingsModal() {
         const p = parseInt(dom.settingsPitchSlider.value);
         state.settings.pitch = `${p >= 0 ? "+" : ""}${p}Hz`;
 
+        if (dom.settingsBitrate) {
+            state.settings.bitrate = dom.settingsBitrate.value;
+        }
+
         localStorage.setItem("pl_khmer_settings", JSON.stringify(state.settings));
         dom.activeModelLabel.textContent = state.settings.modelName;
         if (dom.mainModelSelect) dom.mainModelSelect.value = state.settings.modelName;
@@ -1032,6 +1046,7 @@ async function loadInitialSettings() {
         if (backend.style && !saved) state.settings.style = backend.style;
         if (backend.batch_size && !saved) state.settings.batchSize = backend.batch_size;
         if (backend.concurrency && !saved) state.settings.concurrency = backend.concurrency;
+        if (backend.bitrate && !saved) state.settings.bitrate = backend.bitrate;
     } catch (e) {
         console.warn("Could not fetch /api/settings:", e);
     }
@@ -1069,6 +1084,10 @@ async function loadInitialSettings() {
 
     dom.settingsConcurrencySlider.value = state.settings.concurrency || 8;
     dom.labelConcurrency.textContent = state.settings.concurrency || 8;
+
+    if (dom.settingsBitrate) {
+        dom.settingsBitrate.value = state.settings.bitrate || "128k";
+    }
 }
 
 function escapeHtml(str) {

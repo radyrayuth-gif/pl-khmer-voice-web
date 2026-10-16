@@ -4,6 +4,7 @@ import json
 import time
 import asyncio
 import re
+import gc
 import traceback
 from typing import List, Dict, Any, Optional
 from datetime import timedelta
@@ -18,10 +19,32 @@ if SRT_DIR not in sys.path:
 AUDIO_OUTPUT_DIR = os.path.join(BASE_DIR, "audio_output")
 os.makedirs(AUDIO_OUTPUT_DIR, exist_ok=True)
 
+# Detect if running in cloud container (Render, Hugging Face, etc.)
+IS_CLOUD = bool(os.environ.get("RENDER") or os.environ.get("PORT") or os.environ.get("SPACE_ID"))
+# On cloud free tier (Render 0.1 CPU, 512MB RAM), optimized 128k bitrate allows smooth 6-worker concurrency
+DEFAULT_TTS_CONCURRENCY = 6 if IS_CLOUD else 12
+DEFAULT_BATCH_CONCURRENCY = 3 if IS_CLOUD else 6
+
+def clean_old_temp_audio_files(max_age_sec: int = 7200):
+    """Deletes temporary line_*.mp3 and master_*.mp3 files older than 2 hours to prevent disk exhaustion."""
+    try:
+        now = time.time()
+        for fname in os.listdir(AUDIO_OUTPUT_DIR):
+            if fname.startswith("line_") or fname.startswith("master_"):
+                fpath = os.path.join(AUDIO_OUTPUT_DIR, fname)
+                try:
+                    if os.path.isfile(fpath) and (now - os.path.getmtime(fpath)) > max_age_sec:
+                        os.remove(fpath)
+                except Exception:
+                    pass
+    except Exception as e:
+        print(f"[Cleanup] Old audio files cleanup warning: {e}")
+
 from fastapi import FastAPI, UploadFile, File, Form, WebSocket, WebSocketDisconnect, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
 from pydantic import BaseModel
 import edge_tts
 from pydub import AudioSegment
@@ -86,6 +109,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+app.add_middleware(GZipMiddleware, minimum_size=1000)
 
 STATIC_DIR = os.path.join(BASE_DIR, "static")
 if not os.path.exists(os.path.join(STATIC_DIR, "index.html")) and os.path.exists(os.path.join(BASE_DIR, "index.html")):
@@ -105,7 +129,7 @@ def get_desktop_settings() -> Dict[str, Any]:
         "request_delay": 0.1,
         "rate": "+20%",
         "pitch": "+0Hz",
-        "bitrate": "320k"
+        "bitrate": "128k"
     }
     try:
         from PyQt5.QtCore import QSettings
@@ -194,7 +218,7 @@ class SaveSettingsReq(BaseModel):
     request_delay: Optional[float] = 0.1
     rate: Optional[str] = "+20%"
     pitch: Optional[str] = "+0Hz"
-    bitrate: Optional[str] = "320k"
+    bitrate: Optional[str] = "128k"
 
 class AutoPipelineReq(BaseModel):
     items: List[Dict[str, Any]]
@@ -207,14 +231,14 @@ class AutoPipelineReq(BaseModel):
     rate: Optional[str] = "+20%"
     pitch: Optional[str] = "+0Hz"
     auto_speed: Optional[bool] = True
-    bitrate: Optional[str] = "320k"
+    bitrate: Optional[str] = "128k"
     filename: Optional[str] = "master_voiceover.srt"
 
 class GenAllVoicesReq(BaseModel):
     items: List[Dict[str, Any]]
     rate: Optional[str] = "+20%"
     pitch: Optional[str] = "+0Hz"
-    bitrate: Optional[str] = "320k"
+    bitrate: Optional[str] = "128k"
     filename: Optional[str] = "master_voiceover.srt"
 
 class SingleTTSReq(BaseModel):
@@ -231,12 +255,12 @@ class SingleTTSReq(BaseModel):
 class CompileMasterReq(BaseModel):
     items: List[Dict[str, Any]]
     filename: Optional[str] = "master_voiceover.mp3"
-    bitrate: Optional[str] = "320k"
+    bitrate: Optional[str] = "128k"
 
 class ExportMasterReq(BaseModel):
     items: List[Dict[str, Any]]
     include_gender_tag: Optional[bool] = True
-    bitrate: Optional[str] = "320k"
+    bitrate: Optional[str] = "128k"
     filename: Optional[str] = None
 
 # Helper for resolving voice name
@@ -259,7 +283,7 @@ async def generate_single_audio_clip(
     speed_setting: str,
     global_rate: str = "+20%",
     global_pitch: str = "+0Hz",
-    bitrate: str = "320k"
+    bitrate: str = "128k"
 ) -> Dict[str, Any]:
     # 1. Clean TTS text with Lekh Tho expansion (matching voice_engine.py)
     clean_text = clean_tts_text(text)
@@ -312,11 +336,11 @@ async def generate_single_audio_clip(
 
     # 5. Check speakable content
     has_content = bool(re.search(r'[\u1780-\u17FFa-zA-Z0-9]', clean_text))
-    export_params = ["-q:a", "0", "-ar", "48000"]
+    export_params = ["-ar", "44100"]
     if not has_content:
         silence_dur = max(200, min(target_ms, 5000)) if target_ms > 0 else 500
-        silent = AudioSegment.silent(duration=silence_dur)
-        silent.export(filepath, format="mp3", bitrate=bitrate, parameters=export_params)
+        silent = AudioSegment.silent(duration=silence_dur, frame_rate=44100)
+        silent.export(filepath, format="mp3", bitrate=bitrate or "128k", parameters=export_params)
         return {
             "id": sub_id,
             "audio_url": f"/audio_output/{filename}",
@@ -339,7 +363,7 @@ async def generate_single_audio_clip(
             if use_echo:
                 trimmed = apply_echo_effect(trimmed)
 
-            trimmed.export(filepath, format="mp3", bitrate=bitrate, parameters=export_params)
+            trimmed.export(filepath, format="mp3", bitrate=bitrate or "128k", parameters=export_params)
         except Exception as e:
             print(f"Audio postprocessing warning for line {sub_id}: {e}")
 
@@ -353,7 +377,7 @@ async def generate_single_audio_clip(
     }
 
 # Helper to compile Master MP3
-def compile_master_audio_file(items: List[Dict[str, Any]], out_filename: Optional[str] = None, bitrate: str = "320k") -> Optional[Dict[str, Any]]:
+def compile_master_audio_file(items: List[Dict[str, Any]], out_filename: Optional[str] = None, bitrate: str = "128k") -> Optional[Dict[str, Any]]:
     valid_clips = []
     for it in items:
         audio_url = it.get("audio_url")
@@ -379,23 +403,43 @@ def compile_master_audio_file(items: List[Dict[str, Any]], out_filename: Optiona
 
     out_filepath = os.path.join(AUDIO_OUTPUT_DIR, final_mp3_name)
 
-    max_dur = 0
-    for path, start_ms, end_ms, dur_ms in valid_clips:
-        max_dur = max(max_dur, start_ms + dur_ms, end_ms)
+    # Sort clips chronologically by start timestamp
+    valid_clips.sort(key=lambda x: x[1])
 
-    if max_dur <= 0:
-        max_dur = 1000
+    # Ultra-low-memory sequential timeline assembler (avoids OOM on 512MB RAM)
+    master = AudioSegment.empty()
+    cur_pos = 0
 
-    master = AudioSegment.silent(duration=max_dur + 500)
     for path, start_ms, end_ms, dur_ms in valid_clips:
         try:
             clip = AudioSegment.from_file(path)
-            master = master.overlay(clip, position=start_ms)
+            clip_len = len(clip)
+
+            if start_ms > cur_pos:
+                gap = start_ms - cur_pos
+                master += AudioSegment.silent(duration=gap, frame_rate=44100)
+                master += clip
+                cur_pos = start_ms + clip_len
+            elif start_ms < cur_pos:
+                # Small overlap: overlay clip at offset start_ms
+                master = master.overlay(clip, position=start_ms)
+                cur_pos = max(cur_pos, start_ms + clip_len)
+            else:
+                master += clip
+                cur_pos += clip_len
         except Exception as e:
             print(f"Overlay error for {path}: {e}")
 
-    export_params = ["-q:a", "0", "-ar", "48000"]
-    master.export(out_filepath, format="mp3", bitrate=bitrate or "320k", parameters=export_params)
+    max_dur = max(cur_pos, 1000)
+    if len(master) == 0:
+        master = AudioSegment.silent(duration=1000, frame_rate=44100)
+
+    export_params = ["-ar", "44100"]
+    master.export(out_filepath, format="mp3", bitrate=bitrate or "128k", parameters=export_params)
+    del master
+    clean_old_temp_audio_files()
+    gc.collect()
+
     return {
         "master_url": f"/audio_output/{final_mp3_name}",
         "filename": final_mp3_name,
@@ -657,9 +701,11 @@ async def api_auto_start(req: AutoPipelineReq):
             total_batches = len(batches_with_ctx)
             completed_count = 0
 
-            # Concurrency workers: 16 threads for TTS (matching voice_engine.py) and concurrent batches
-            tts_semaphore = asyncio.Semaphore(16)
-            batch_semaphore = asyncio.Semaphore(req.concurrency or 6)
+            # Concurrency workers: dynamic scaling based on cloud vs local environment
+            tts_concurrency = DEFAULT_TTS_CONCURRENCY if IS_CLOUD else min(req.concurrency or 8, 12)
+            batch_concurrency = DEFAULT_BATCH_CONCURRENCY if IS_CLOUD else min(req.concurrency or 6, 8)
+            tts_semaphore = asyncio.Semaphore(tts_concurrency)
+            batch_semaphore = asyncio.Semaphore(batch_concurrency)
             tts_tasks = []
 
             async def process_batch_and_stream_tts(batch_tuple, b_idx):
@@ -719,7 +765,7 @@ async def api_auto_start(req: AutoPipelineReq):
                                         speed_setting=speed,
                                         global_rate=req.rate or "+20%",
                                         global_pitch=req.pitch or "+0Hz",
-                                        bitrate=req.bitrate or "320k"
+                                        bitrate=req.bitrate or "128k"
                                     )
                                     dur_sec = clip_res["duration_ms"] / 1000.0
                                     dur_str = f"{dur_sec:.1f}s / {(target_ms / 1000.0):.1f}s"
@@ -779,7 +825,7 @@ async def api_auto_start(req: AutoPipelineReq):
                 "progress": 96
             })
 
-            master_res = await loop.run_in_executor(None, lambda: compile_master_audio_file(list(items_dict.values()), out_filename=req.filename, bitrate=req.bitrate or "320k"))
+            master_res = await loop.run_in_executor(None, lambda: compile_master_audio_file(list(items_dict.values()), out_filename=req.filename, bitrate=req.bitrate or "128k"))
 
             master_url = master_res["master_url"] if master_res else None
             master_dur = master_res["duration_sec"] if master_res else 0
@@ -858,13 +904,14 @@ async def api_gen_all_voices(req: GenAllVoicesReq):
         try:
             total_items = len(req.items)
             items_dict = {it["id"]: dict(it) for it in req.items}
-            sem = asyncio.Semaphore(16)
+            concurrency_val = DEFAULT_TTS_CONCURRENCY if IS_CLOUD else 12
+            sem = asyncio.Semaphore(concurrency_val)
             completed_tts = 0
 
             await manager.broadcast({
                 "type": "pipeline_status",
                 "stage": "translating_and_dubbing",
-                "message": f"🎙️ កំពុងបង្កើតសំឡេងទាំងអស់ដោយល្បឿនលឿន (16 Threads)...",
+                "message": f"🎙️ កំពុងបង្កើតសំឡេងទាំងអស់ដោយល្បឿនលឿន ({concurrency_val} Workers)...",
                 "progress": 5
             })
 
@@ -897,7 +944,7 @@ async def api_gen_all_voices(req: GenAllVoicesReq):
                             speed_setting=speed,
                             global_rate=req.rate or "+20%",
                             global_pitch=req.pitch or "+0Hz",
-                            bitrate=req.bitrate or "320k"
+                            bitrate=req.bitrate or "128k"
                         )
                         dur_sec = clip_res["duration_ms"] / 1000.0
                         dur_str = f"{dur_sec:.1f}s / {(target_ms / 1000.0):.1f}s"
@@ -943,7 +990,7 @@ async def api_gen_all_voices(req: GenAllVoicesReq):
             })
 
             loop = asyncio.get_event_loop()
-            master_res = await loop.run_in_executor(None, lambda: compile_master_audio_file(list(items_dict.values()), out_filename=req.filename, bitrate=req.bitrate or "320k"))
+            master_res = await loop.run_in_executor(None, lambda: compile_master_audio_file(list(items_dict.values()), out_filename=req.filename, bitrate=req.bitrate or "128k"))
 
             master_url = master_res["master_url"] if master_res else None
             master_dur = master_res["duration_sec"] if master_res else 0
@@ -979,7 +1026,7 @@ async def api_compile_master(req: CompileMasterReq):
         raise HTTPException(status_code=400, detail="គ្មានទិន្នន័យសំឡេងត្រូវផ្គុំឡើយ")
 
     loop = asyncio.get_event_loop()
-    res = await loop.run_in_executor(None, lambda: compile_master_audio_file(items, req.filename, req.bitrate or "320k"))
+    res = await loop.run_in_executor(None, lambda: compile_master_audio_file(items, req.filename, req.bitrate or "128k"))
     if not res:
         raise HTTPException(status_code=400, detail="មិនទាន់មានសំឡេងណាមួយត្រូវបានបង្កើតឡើយ។")
 
@@ -1023,7 +1070,7 @@ async def api_export_master(req: ExportMasterReq):
 
     # 2. Compile Master Audio using helper matching original filename
     loop = asyncio.get_event_loop()
-    res = await loop.run_in_executor(None, lambda: compile_master_audio_file(items, out_filename=req.filename, bitrate=req.bitrate or "320k"))
+    res = await loop.run_in_executor(None, lambda: compile_master_audio_file(items, out_filename=req.filename, bitrate=req.bitrate or "128k"))
     master_url = res["master_url"] if res else None
 
     return {
@@ -1039,12 +1086,29 @@ def serve_audio(filename: str):
         raise HTTPException(status_code=404, detail="File Not Found")
     return FileResponse(filepath, media_type="audio/mpeg")
 
+@app.get("/api/health")
+def api_health():
+    """Health check endpoint to keep cloud servers (e.g. Render) awake and check status."""
+    return {
+        "status": "ok",
+        "service": "PL Khmer Voice Web",
+        "cloud": IS_CLOUD,
+        "is_pipeline_running": is_pipeline_running,
+        "timestamp": int(time.time())
+    }
+
 @app.websocket("/ws/progress")
 async def websocket_endpoint(websocket: WebSocket):
     await manager.connect(websocket)
     try:
         while True:
-            await websocket.receive_text()
+            text = await websocket.receive_text()
+            try:
+                msg = json.loads(text)
+                if msg.get("type") == "ping":
+                    await websocket.send_json({"type": "pong"})
+            except Exception:
+                pass
     except WebSocketDisconnect:
         manager.disconnect(websocket)
     except Exception:
